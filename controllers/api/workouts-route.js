@@ -5,13 +5,20 @@ const Workout = require('../../models/workoutModel')
 router.get('/', (req, res) => {
   Workout.find({}, (err, exercise) => {
     try {
-      res.render('', {
-        exercises: exercise
-      })
+      res.json(exercise)
     } catch {
       res.json(err)
     }
   })
+
+  Workout.aggregate(
+    { $addField: {
+        _id: null,
+        total:       { $sum: { $add: ["$user_totaldocs", "$user_totalthings"] } },
+        totaldocs:   { $sum: "$user_totaldocs" },
+        totalthings: { $sum: "$user_totalthings" }
+    }}
+)
 });
 
 router.post("/", ({ body }, res) => {
@@ -42,9 +49,7 @@ router.put('/:id', async (req, res) => {
 router.get('/range', (req, res) => {
   Workout.find({}, (err, exercise) => {
     try {
-      res.render('', {
-        exercises: exercise
-      })
+      res.json(exercise)
     } catch {
       res.json(err)
     }
