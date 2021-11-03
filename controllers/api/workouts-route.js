@@ -3,22 +3,18 @@ const router = require('express').Router();
 const Workout = require('../../models/workoutModel')
 
 router.get('/', (req, res) => {
-  Workout.find({}, (err, exercise) => {
-    try {
-      res.json(exercise)
-    } catch {
-      res.json(err)
-    }
-  })
 
   Workout.aggregate(
-    { $addField: {
-        _id: null,
-        total:       { $sum: { $add: ["$user_totaldocs", "$user_totalthings"] } },
-        totaldocs:   { $sum: "$user_totaldocs" },
-        totalthings: { $sum: "$user_totalthings" }
-    }}
-)
+    [{ $addFields: {
+        totalDuration: { 
+          $sum: '$exercises.duration'
+        },
+    }}]
+  ).then(data => {
+    res.json(data)
+  }).catch(err => {
+    res.json(err)
+  })
 });
 
 router.post("/", ({ body }, res) => {
